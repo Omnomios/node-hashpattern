@@ -1,14 +1,24 @@
 var crypto = require('crypto');
 var child = require('child_process');
 var os = require('os');
+var argv = require('minimist')(process.argv.slice(2),{string:['m','_']});
 
 var MAX_WORKERS = os.cpus().length;
+var HASHTYPE = "sha256";
 
-var args = process.argv.slice(2);
-if(args[0] != "")
+if(typeof argv.t != "undefined")
 {
-	var MODE = args[0];
+	var validHashes = crypto.getHashes();
+	HASHTYPE = argv.t.trim();
+	if(validHashes.indexOf(HASHTYPE) == -1)
+	{
+		console.error("Unsupported hash type:", HASHTYPE);
+		process.exit();
+	}
 }
+
+args = argv._;
+if(args[0]) var MODE = args[0];
 
 switch(MODE)
 {
@@ -54,7 +64,7 @@ switch(MODE)
             var NONCE = OFFSET+i;
             var inputValue = PREFIX+NONCE.toString(16);
 
-            var hash = crypto.createHash('sha256').update(inputValue.toString()).digest("hex");
+            var hash = crypto.createHash(HASHTYPE).update(inputValue.toString()).digest("hex");
             if(hash.lastIndexOf(NEEDLE, 0) === 0)
                 process.send(JSON.stringify({action:"found", input:inputValue, result:hash}));
 
@@ -95,7 +105,7 @@ switch(MODE)
 
         for(var i=0; i < MAX_WORKERS; i++)
         {
-        	var worker = child.fork(process.argv[1], ["worker",WORKER_OFFSET, WORKER_WIDTH, NEEDLE, PREFIX]);
+        	var worker = child.fork(process.argv[1], ["-t "+HASHTYPE,"worker",WORKER_OFFSET, WORKER_WIDTH, NEEDLE, PREFIX]);
             hashrate.push(0);
 
             worker.index = i;
