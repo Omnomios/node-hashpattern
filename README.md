@@ -9,10 +9,11 @@ A node.js program to find the required input to generate a specified pattern at 
 
 ## Usage
 
-     node findsha256.js [OPTIONS] PATTERN [INPUT PREFIX]
+    node findsha256.js [OPTIONS] PATTERN [INPUT PREFIX]
 
 ## Options
 
-    ** Crypto options **
-    -t
-    Specify the method of encryption.
+**Crypto options**
+
+-t
+Specify the method of encryption.
