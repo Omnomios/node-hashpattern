@@ -9,7 +9,7 @@ A node.js program to find the required input to generate a specified pattern at 
 
 ## Usage
 
-    node findsha256.js [OPTIONS] PATTERN [INPUT PREFIX]
+    node findhash.js [OPTIONS] PATTERN
 
 ## Options
 
@@ -17,3 +17,6 @@ A node.js program to find the required input to generate a specified pattern at 
 
 -t
 Specify the method of encryption.
+
+-p
+What prefix to prepend to the hash source
