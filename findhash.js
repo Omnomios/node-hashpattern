@@ -14,44 +14,45 @@ let WORKERS = MAX_WORKERS;
 let PREFIX = "";
 
 //What what cypher to use
-if(typeof argv.t != "undefined") {
+if(typeof argv.t !== "undefined") {
 	var validHashes = crypto.getHashes();
 	HASHTYPE = argv.t.trim();
-	if(validHashes.indexOf(HASHTYPE) == -1) {
+	if(validHashes.indexOf(HASHTYPE) === -1) {
 		console.error("Unsupported hash type:", HASHTYPE);
 		process.exit();
 	}
 }
 
 //Specify seed prefix
-if(typeof argv.p != "undefined") {
+if(typeof argv.p !== "undefined") {
 	PREFIX = argv.p.trim();
 }
 
 //Detune
-if(typeof argv.d != "undefined") {
+if(typeof argv.d !== "undefined") {
 	WORKERS -= parseInt(argv.d);
-	if(WORKERS < 1) {
-		WORKERS == 1
-	}
+	if(WORKERS < 1) { WORKERS = 1; }
 }
 
 let args = argv._;
-if(args[0]) var MODE = args[0];
-switch(MODE)
-{
+if(args[0]) { var MODE = args[0]; }
+
+switch(MODE) {
     case "worker":
         process.title = "HashWorker";
-
-        if(args[1] != "") var NEEDLE = args[1];
+        if(args[1] !== "") { var NEEDLE = args[1]; }
 		var worker = new Worker(HASHTYPE, NEEDLE, PREFIX);
-        worker.begin();
+
+		worker.begin();
     break;
 
     default:
         console.error("Findhash v1.0");
-		if(args[0] != "")
+		if(args[0] !== "") {
 			var NEEDLE = args[0];
+		}
 		var foreman = new Foreman(HASHTYPE, PREFIX, NEEDLE, WORKERS, WORKER_WIDTH);
+
+		foreman.begin();
     break;
 }

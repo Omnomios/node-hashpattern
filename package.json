@@ -1,6 +1,6 @@
 {
   "name": "hashpattern",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "A multithreaded bruteforce hash pattern generator",
   "main": "findhash.js",
   "scripts": {

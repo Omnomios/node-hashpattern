@@ -2,29 +2,34 @@
 const child = require('child_process');
 
 module.exports = function(hashtype, prefix, needle, maxWorkers, workerWidth) {
+
     this.needle = needle;
-    this.prefix = prefix;
+    this.seedprefix = prefix;
     this.hashtype = hashtype;
     this.maxWorkers = maxWorkers;
     this.workerWidth = workerWidth;
 
-    const hashrateInterval = 5000;
-
-    setInterval(()=>{ this.calcHashes(hashrateInterval); }, hashrateInterval);
-    for(var i=0; i < this.maxWorkers; i++) {
-        this.startWorker(i);
-    }
-}
+    return this;
+};
 
 module.exports.prototype = {
     needle: "",
-    prefix: "",
+    seedprefix: "",
     hashrate: [],
     workerOffset: 0,
     workerWidth: 0,
     maxWorkers: 0,
     workerCount: 0,
     worker: [],
+
+    begin: function() {
+        const hashrateInterval = 5000;
+
+        setInterval(()=>{ this.calcHashes(hashrateInterval); }, hashrateInterval);
+        for(var i=0; i < this.maxWorkers; i++) {
+            this.startWorker(i);
+        }
+    },
 
     calcHashes: function(duration) {
         let totalhash = 0;
@@ -37,14 +42,24 @@ module.exports.prototype = {
         let delta = 1000 / duration;
         totalhash *= delta;
 
-        console.error(`Rate: ${this.humanHashes(totalhash)}/s [thread ${this.humanHashes(totalhash/this.hashrate.length)}/s]`);
+        if(!isNaN(totalhash)) {
+            console.error(`Rate: ${this.humanHashes(totalhash)}/s [thread ${this.humanHashes(totalhash/this.hashrate.length)}/s]`);
+        }
     },
-
 
     startWorker: function(index) {
         var parentThis = this;
 
-        var worker = child.fork(process.argv[1], ["-t "+this.hashtype, "-p "+this.prefix,"worker", this.needle]);
+        var childArgs = [];
+
+        childArgs.push("-t "+this.hashtype);
+        if(this.seedprefix !== "") {
+            childArgs.push("-p "+this.seedprefix);
+        }
+        childArgs.push("worker");
+        childArgs.push(this.needle);
+
+        var worker = child.fork(process.argv[1], childArgs);
 
         worker.index = index;
     	worker.on('close', function (code) {
@@ -81,9 +96,9 @@ module.exports.prototype = {
 
     humanHashes: function(hashes) {
     	var sizes = ['h', 'Kh', 'Mh', 'Gh', 'Th'];
-    	if (hashes == 0) return '0 H/s';
+    	if (hashes === 0){ return '0 H/s'; }
     	var i = parseInt(Math.floor(Math.log(hashes) / Math.log(1000)));
     	return Math.round(hashes / Math.pow(1000, i), 2) + ' ' + sizes[i];
     }
 
-}
+};
