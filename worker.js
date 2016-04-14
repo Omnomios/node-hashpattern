@@ -1,8 +1,8 @@
-var crypto = require('crypto');
+"use strict";
 
-module.exports = function(hashtype, offset, range, needle, prefix) {
-    this.OFFSET = offset;
-    this.RANGE = range;
+const crypto = require('crypto');
+
+module.exports = function(hashtype, needle, prefix) {
     this.NEEDLE = needle;
     this.PREFIX = prefix;
     this.HASHTYPE = hashtype;
@@ -17,14 +17,16 @@ module.exports.prototype = {
     PREFIX: 0,
     HASHTYPE: "",
 
+
+    frametime: 0,
     i: 0,
     hashcount: 0,
 
     begin: function() {
         process.send(JSON.stringify({action:"hello", offset: this.OFFSET, range: this.RANGE }));
-        process.on('message', this.message);
-        setImmediate(()=>{this.compute();});
-        setInterval(()=>{this.sendRate();}, 1000);
+        process.on('message', (data)=>{this.message(data);});
+        //setInterval(()=>{this.sendRate();}, 1000);
+        process.nextTick(()=>{this.compute();});
     },
 
     sendRate: function() {
@@ -33,13 +35,13 @@ module.exports.prototype = {
     },
 
     message: function(response) {
-		var data = JSON.parse(response);
+        var data = JSON.parse(response);
 		switch(data.action) {
             case "work":
                 this.i = 0;
                 this.OFFSET = data.offset;
                 this.RANGE = data.range;
-                setImmediate(()=>{this.compute();});
+                process.nextTick(()=>{this.compute();});
 			break;
 		}
     },
@@ -50,17 +52,25 @@ module.exports.prototype = {
 
     compute: function() {
         var nonce = this.OFFSET+this.i;
-        var inputValue = this.PREFIX+nonce.toString(16);
-        var hash = this.calcHash(inputValue);
-        if(hash.lastIndexOf(this.NEEDLE, 0) === 0) {
+        const inputValue = this.PREFIX+nonce.toString(16);
+        const hash = this.calcHash(inputValue);
+
+        if(hash.indexOf(this.NEEDLE, 0) === 0) {
 			process.send(JSON.stringify({action:"found", input:inputValue, result:hash}));
 		}
+
+        if(this.frametime < new Date().getTime()) {
+            this.frametime = new Date().getTime()+100;
+            this.sendRate();
+        }
+
         this.i++;
         this.hashcount++;
         if(this.i < this.RANGE) {
-			setImmediate(()=>{this.compute();});
+			return process.nextTick(()=>{ this.compute(); });
 		} else {
-			process.send(JSON.stringify({ action:"getwork" }));
+            this.sendRate();
+			return process.send(JSON.stringify({ action: "getwork" }));
 		}
     }
 }

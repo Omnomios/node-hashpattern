@@ -1,6 +1,6 @@
 {
-  "name": "findhash",
-  "version": "1.0.0",
+  "name": "hashpattern",
+  "version": "1.1.0",
   "description": "A multithreaded bruteforce hash pattern generator",
   "main": "findhash.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/omnomios/node-hashpattern.git"
   },
-  "author": "Stefan Kent",
+  "author": "dev@stefan-kent.com",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/omnomios/node-hashpattern/issues"

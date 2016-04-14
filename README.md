@@ -1,5 +1,5 @@
-# node-hashpattern
-A node.js program to find the required input to generate a specified pattern at the start of a SHA256 hash.
+# hashpattern
+A node.js program to find the required input to generate a specified pattern at the start of a hash.
 
 ## Features
 
@@ -13,10 +13,14 @@ A node.js program to find the required input to generate a specified pattern at 
 
 ## Options
 
-**Crypto options**
+    Type
+    -t [string] Default: "sha256"
+    Specify the method to hash with.
 
--t
-Specify the method of encryption.
+    Prefix
+    -p [string] Default: ""
+    What prefix to prepend to the hash source. The hash source is always a hex encoded integer.
 
--p
-What prefix to prepend to the hash source
+    Detune
+    -d [number] Default: 0
+    Reduces the number of threads by [number]
